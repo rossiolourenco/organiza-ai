@@ -5,7 +5,7 @@ export default function Layout() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#111827',
+          backgroundColor: '#4f46e5',
         },
         headerTintColor: '#ffffff',
         headerTitleStyle: {
@@ -16,31 +16,40 @@ export default function Layout() {
       <Stack.Screen
         name="index"
         options={{
-          title: 'Organiza Aí',
+          title: 'Login',
           headerShown: false,
         }}
       />
 
       <Stack.Screen
-        name="tarefas"
+        name="cadastro"
         options={{
-          title: 'Minhas Tarefas',
+          title: 'Criar conta',
+        }}
+      />
+
+      <Stack.Screen
+        name="home"
+        options={{
+          title: 'Organiza Aí',
+          headerBackVisible: false,
         }}
       />
 
       <Stack.Screen
         name="novaTarefa"
         options={{
-          title: 'Nova Tarefa',
+          title: 'Nova tarefa',
         }}
       />
 
       <Stack.Screen
-        name="concluidas"
+        name="editarTarefa"
         options={{
-          title: 'Tarefas Concluídas',
+          title: 'Editar tarefa',
         }}
       />
+
     </Stack>
   );
 }
