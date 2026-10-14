@@ -43,6 +43,8 @@ export default function Layout() {
         }}
       />
 
+      <Stack.Screen name="categorias" options={{ title: "Categorias" }} />
+
       <Stack.Screen
         name="editarTarefa"
         options={{

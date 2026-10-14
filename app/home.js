@@ -8,9 +8,10 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  TextInput,
 } from "react-native";
 
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 
 import { obterApiUrl, fetchComTimeout } from "../servicos/api";
 
@@ -28,6 +29,19 @@ export default function Home() {
   const [carregando, setCarregando] = useState(true);
   const [filtroStatus, setFiltroStatus] = useState("TODAS");
   const [filtroPrioridade, setFiltroPrioridade] = useState("TODAS");
+  const [dataInicial, setDataInicial] = useState("");
+  const [dataFinal, setDataFinal] = useState("");
+  const [mostrarDatas, setMostrarDatas] = useState(false);
+  const datasValidas = (!dataInicial || validarData(dataInicial)) &&
+    (!dataFinal || validarData(dataFinal)) &&
+    (!dataInicial || !dataFinal || dataInicial <= dataFinal);
+
+  function limparFiltros() {
+    setFiltroStatus("TODAS");
+    setFiltroPrioridade("TODAS");
+    setDataInicial("");
+    setDataFinal("");
+  }
 
   async function carregarTarefas() {
     try {
@@ -59,9 +73,7 @@ export default function Home() {
     }
   }
 
-  useEffect(() => {
-    carregarTarefas();
-  }, []);
+  useFocusEffect(React.useCallback(() => { carregarTarefas(); }, [usuarioId]));
 
   const tarefasFiltradas = tarefas.filter((tarefa) => {
     const statusOk = filtroStatus === "TODAS" || tarefa.status === filtroStatus;
@@ -69,7 +81,11 @@ export default function Home() {
     const prioridadeOk =
       filtroPrioridade === "TODAS" || tarefa.prioridade === filtroPrioridade;
 
-    return statusOk && prioridadeOk;
+    const prazo = typeof tarefa.dataPrazo === "string"
+      ? tarefa.dataPrazo.slice(0, 10) : "";
+    const inicialOk = !dataInicial || (prazo && prazo >= dataInicial);
+    const finalOk = !dataFinal || (prazo && prazo <= dataFinal);
+    return datasValidas && statusOk && prioridadeOk && inicialOk && finalOk;
   });
 
   const totalPendentes = tarefas.filter(
@@ -267,6 +283,11 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity style={styles.gerenciarCategorias} onPress={() =>
+          router.push({ pathname: "/categorias", params: { usuarioId, nome } })}>
+          <Text style={styles.gerenciarCategoriasTexto}>Gerenciar categorias</Text>
+        </TouchableOpacity>
+
         <Text style={styles.filtroTitulo}>Status</Text>
 
         <ScrollView
@@ -326,6 +347,26 @@ export default function Home() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        <View style={styles.linhaFiltrosExtras}>
+          <TouchableOpacity onPress={() => setMostrarDatas(!mostrarDatas)}>
+            <Text style={styles.atualizar}>{mostrarDatas ? "Ocultar datas" : "Filtrar por datas"}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={limparFiltros}>
+            <Text style={styles.atualizar}>Limpar filtros</Text>
+          </TouchableOpacity>
+        </View>
+        {mostrarDatas && (
+          <View style={styles.areaDatas}>
+            <Text style={styles.filtroTitulo}>Data inicial (AAAA-MM-DD)</Text>
+            <TextInput style={styles.campoData} placeholder="2026-10-10"
+              value={dataInicial} onChangeText={setDataInicial} keyboardType="numbers-and-punctuation" maxLength={10} />
+            <Text style={styles.filtroTitulo}>Data final (AAAA-MM-DD)</Text>
+            <TextInput style={styles.campoData} placeholder="2026-10-20"
+              value={dataFinal} onChangeText={setDataFinal} keyboardType="numbers-and-punctuation" maxLength={10} />
+            {!datasValidas && <Text style={styles.erroData}>Confira as datas (AAAA-MM-DD). A data inicial não pode ser posterior à final.</Text>}
+          </View>
+        )}
 
         <View style={styles.resultadoLinha}>
           <Text style={styles.resultado}>
@@ -419,7 +460,20 @@ export default function Home() {
   );
 }
 
+function validarData(valor) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
+  const [ano, mes, dia] = valor.split("-").map(Number);
+  const data = new Date(Date.UTC(ano, mes - 1, dia));
+  return data.getUTCFullYear() === ano && data.getUTCMonth() === mes - 1 && data.getUTCDate() === dia;
+}
+
 const styles = StyleSheet.create({
+  gerenciarCategorias: { alignSelf: "flex-start", marginBottom: 18, backgroundColor: "#eef2ff", padding: 11, borderRadius: 9 },
+  gerenciarCategoriasTexto: { color: "#4f46e5", fontWeight: "bold" },
+  linhaFiltrosExtras: { flexDirection: "row", justifyContent: "space-between", marginBottom: 15 },
+  areaDatas: { backgroundColor: "#fff", padding: 12, borderRadius: 10, marginBottom: 16 },
+  campoData: { borderWidth: 1, borderColor: "#d0d5dd", borderRadius: 8, padding: 11, marginBottom: 12 },
+  erroData: { color: "#b42318", marginBottom: 8 },
   container: {
     flex: 1,
     backgroundColor: "#f7f8fc",

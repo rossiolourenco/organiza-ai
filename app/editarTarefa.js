@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import {
+  useFocusEffect,
   useLocalSearchParams,
   useRouter,
 } from 'expo-router';
@@ -108,9 +109,7 @@ export default function EditarTarefa() {
     }
   }
 
-  useEffect(() => {
-    carregarDados();
-  }, []);
+  useFocusEffect(React.useCallback(() => { carregarDados(); }, [id, usuarioId]));
 
   async function salvar() {
     if (titulo.trim() === '') {

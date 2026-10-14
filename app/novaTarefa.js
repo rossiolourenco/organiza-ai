@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 
 import { obterApiUrl, fetchComTimeout } from "../servicos/api";
 
@@ -68,9 +68,7 @@ export default function NovaTarefa() {
     }
   }
 
-  useEffect(() => {
-    carregarCategorias();
-  }, []);
+  useFocusEffect(React.useCallback(() => { carregarCategorias(); }, [usuarioId]));
 
   async function salvar() {
     if (titulo.trim() === "") {
@@ -215,7 +213,12 @@ export default function NovaTarefa() {
         autoCapitalize="none"
       />
 
-      <Text style={styles.label}>Categoria</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <Text style={styles.label}>Categoria</Text>
+        <TouchableOpacity onPress={() => router.push({ pathname: "/categorias", params: { usuarioId, nome } })}>
+          <Text style={{ color: "#4f46e5", fontWeight: "bold" }}>Gerenciar</Text>
+        </TouchableOpacity>
+      </View>
 
       {carregandoCategorias ? (
         <View style={styles.carregandoCategorias}>
