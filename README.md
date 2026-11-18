@@ -1,5 +1,15 @@
 # Organiza Aí
 
+> **Mobile 3.0 — Premium Experience:** consulte [docs/MOBILE-3.0.md](docs/MOBILE-3.0.md) para
+> arquitetura, design system, funcionalidades, fórmulas, execução e limites. A entrega técnica,
+> as migrações e o roteiro estão em
+> [../organiza-ai-web/docs/MOBILE-3.0-ENTREGA.md](../organiza-ai-web/docs/MOBILE-3.0-ENTREGA.md)
+> e [../organiza-ai-web/docs/DEMONSTRACAO-MOBILE-3.0.md](../organiza-ai-web/docs/DEMONSTRACAO-MOBILE-3.0.md).
+>
+> O backend compartilhado exige a migração V003 e sessão Bearer.
+>
+> As notas abaixo descrevem as entregas acadêmicas anteriores.
+
 Aplicativo móvel desenvolvido para a disciplina de Desenvolvimento Mobile.
 
 ## Sobre o projeto
