@@ -38,14 +38,14 @@ beforeEach(() => {
 test('login real da interface protege rotas e abre as cinco áreas', async () => {
   const navigation = renderRouter(routes, { initialUrl: '/home' });
   await screen.findByText('Bem-vindo de volta');
+  expect(screen.queryByLabelText('Servidor')).toBeNull();
   expect(screen.queryByText('Seu dia, com mais intenção.')).toBeNull();
-  fireEvent.changeText(screen.getByLabelText('Servidor'), 'localhost:8080');
   fireEvent.changeText(screen.getByLabelText('E-mail'), 'teste@demo.invalid');
   fireEvent.changeText(screen.getByLabelText('Senha'), 'test-password');
-  fireEvent.press(screen.getByLabelText('Entrar no meu espaço'));
+  fireEvent.press(screen.getByLabelText('Entrar'));
   await screen.findByText('Seu dia, com mais intenção.');
   await waitFor(() => expect(navigation.getPathname()).toBe('/home'));
-  expect(sessionStorage.write).toHaveBeenCalledWith(user);
+  expect(sessionStorage.write).toHaveBeenCalledWith({ ...user, server: 'https://organizaai.evox.net.br' });
   for (const [path, title] of [
     ['/tarefas', 'Suas tarefas'], ['/planejamento', 'Planeje com clareza.'],
     ['/foco', 'Uma coisa de cada vez.'], ['/perfil', 'Seu espaço.'],
@@ -66,7 +66,7 @@ test('formulário envia tarefa e checklist pelo serviço HTTP e volta à lista',
   fireEvent.changeText(screen.getByLabelText('Título da etapa 1'), 'Revisar apresentação');
   fireEvent.press(screen.getByLabelText('Salvar tarefa'));
   await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
-    'http://localhost:8080/api/tarefas?usuarioId=1', expect.objectContaining({
+    'https://organizaai.evox.net.br/api/tarefas?usuarioId=1', expect.objectContaining({
       method: 'POST', body: expect.stringContaining('Revisar apresentação'),
     })));
 });
@@ -74,10 +74,9 @@ test('falha de login permanece na tela e exibe mensagem', async () => {
   fetchMock.mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
   renderRouter(routes, { initialUrl: '/' });
   await screen.findByText('Bem-vindo de volta');
-  fireEvent.changeText(screen.getByLabelText('Servidor'), 'localhost:8080');
   fireEvent.changeText(screen.getByLabelText('E-mail'), 'teste@demo.invalid');
   fireEvent.changeText(screen.getByLabelText('Senha'), 'incorreta');
-  fireEvent.press(screen.getByLabelText('Entrar no meu espaço'));
+  fireEvent.press(screen.getByLabelText('Entrar'));
   await screen.findByText('E-mail ou senha incorretos.');
   expect(screen.queryByText('Seu dia, com mais intenção.')).toBeNull();
 });

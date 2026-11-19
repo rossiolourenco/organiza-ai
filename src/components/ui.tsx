@@ -245,17 +245,38 @@ export function FloatingActionButton({ icon = 'plus', label, onPress, bottom = 2
 
 /* --------------------------------- inputs --------------------------------- */
 
-export function Input({ label, hint, error, ...props }: TextInputProps & { label: string; hint?: string; error?: string | null }) {
+export function Input({ label, hint, error, rightAccessory, ...props }: TextInputProps & {
+  label: string; hint?: string; error?: string | null; rightAccessory?: React.ReactNode;
+}) {
   const { colors } = useTheme();
   return <View style={{ gap: 6 }}>
     <Label size="caption" weight="semibold" style={{ color: colors.muted }}>{label}</Label>
-    <TextInput accessibilityLabel={label} placeholderTextColor={colors.muted}
-      {...props} style={[styles.input, { color: colors.text, backgroundColor: colors.surfaceSecondary,
-        borderColor: error ? colors.danger : colors.border },
-        props.multiline && { minHeight: 96, textAlignVertical: 'top' }, props.style]} />
+    <View style={[styles.input, { backgroundColor: colors.surfaceSecondary, flexDirection: 'row',
+      alignItems: 'center', borderColor: error ? colors.danger : colors.border, paddingHorizontal: 0 },
+      props.multiline && { minHeight: 96, alignItems: 'flex-start' }]}>
+      <TextInput accessibilityLabel={label} placeholderTextColor={colors.muted}
+        {...props} style={[{ flex: 1, color: colors.text, fontSize: tokens.font.body,
+          paddingHorizontal: 14, paddingVertical: 12 },
+          props.multiline && { minHeight: 96, textAlignVertical: 'top' }, props.style]} />
+      {rightAccessory ? <View style={{ paddingRight: 6, paddingLeft: 2 }}>{rightAccessory}</View> : null}
+    </View>
     {error ? <Text style={{ color: colors.danger, fontSize: tokens.font.caption }}>{error}</Text> : null}
     {hint ? <Text style={{ color: colors.muted, fontSize: tokens.font.micro }}>{hint}</Text> : null}
   </View>;
+}
+
+export function PasswordInput({ label, value, onChangeText, hint, autoComplete, maxLength = 72 }: {
+  label: string; value: string; onChangeText: (value: string) => void; hint?: string;
+  autoComplete?: TextInputProps['autoComplete']; maxLength?: number;
+}) {
+  const { colors } = useTheme();
+  const [visible, setVisible] = React.useState(false);
+  return <Input label={label} value={value} onChangeText={onChangeText} hint={hint}
+    autoComplete={autoComplete} maxLength={maxLength} secureTextEntry={!visible} autoCapitalize="none"
+    rightAccessory={<Pressable accessibilityRole="button" accessibilityLabel={visible ? 'Ocultar senha' : 'Mostrar senha'}
+      onPress={() => setVisible(current => !current)} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
+      <Feather name={visible ? 'eye-off' : 'eye'} size={18} color={colors.muted} />
+    </Pressable>} />;
 }
 
 export function SearchBar({ value, onChangeText, placeholder = 'Buscar', onSubmit }: {

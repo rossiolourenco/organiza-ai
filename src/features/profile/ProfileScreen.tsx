@@ -119,7 +119,7 @@ export default function ProfileScreen() {
         <View style={{ flex: 1, minWidth: 0 }}>
           <Label size="subtitle" weight="bold">{session?.nome}</Label>
           <Label muted size="caption">{session?.email}</Label>
-          <Label muted size="micro">Servidor: {session?.server}</Label>
+          <Label muted size="micro">Sessão segura · API oficial com HTTPS</Label>
         </View>
         {demo ? <Badge title="DEMO" tone="warning" /> : null}
       </Row>
