@@ -27,6 +27,7 @@ export default function MainLayout() {
           <Stack.Screen name="revisao" />
           <Stack.Screen name="lixeira" />
           <Stack.Screen name="concentracao" options={{ animation: 'fade' }} />
+          <Stack.Screen name="seguranca" />
         </Stack>
       </FocusProvider>
     </SettingsProvider>

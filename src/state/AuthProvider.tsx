@@ -7,7 +7,11 @@ import { API_ORIGIN } from '../services/config';
 interface Auth {
   session: Session | null; ready: boolean; error: string | null;
   login: (email: string, senha: string) => Promise<void>;
-  logout: () => Promise<void>; expire: (token: string) => void;
+  logout: () => Promise<void>;
+  clear: () => Promise<void>;
+  changePassword: (senhaAtual: string, novaSenha: string) => Promise<void>;
+  updateProfile: (nome: string) => Promise<void>;
+  expire: (token: string) => void;
 }
 const Context = createContext<Auth>(null!);
 
@@ -44,15 +48,39 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
     await sessionStorage.write(value); current.current = value; setError(null); setSession(value);
   };
 
+  /** Limpa a sessão local sem chamar o servidor (usado após troca de senha). */
+  const clear = async () => {
+    await sessionStorage.write(null);
+    current.current = null; setSession(null); setError(null);
+  };
+
   const logout = async () => {
     // Se estiver sem rede, logout continua local; token remoto expira em sete dias.
     let revoked = true;
     if (session) await request(session.server, '/usuarios/logout', { method: 'POST' }, session.token)
       .catch(() => { revoked = false; });
-    await sessionStorage.write(null); current.current = null; setSession(null);
-    setError(revoked ? null : 'Você saiu deste aparelho. Sem conexão para revogar a sessão no servidor.');
+    await clear();
+    if (!revoked) setError('Você saiu deste aparelho. Sem conexão para revogar a sessão no servidor.');
   };
 
-  return <Context.Provider value={{ session, ready, error, login, logout, expire }}>{children}</Context.Provider>;
+  /** O backend revoga todas as sessões; a tela deve chamar clear() após o sucesso. */
+  const changePassword = async (senhaAtual: string, novaSenha: string) => {
+    if (!current.current) throw new Error('Sessão expirada. Entre novamente.');
+    await request(current.current.server, '/usuarios/senha',
+      { method: 'PUT', body: JSON.stringify({ senhaAtual, novaSenha }) }, current.current.token);
+  };
+
+  const updateProfile = async (nome: string) => {
+    if (!current.current) throw new Error('Sessão expirada. Entre novamente.');
+    const value = await request<Pick<Session, 'id' | 'nome' | 'email'>>(current.current.server,
+      '/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ nome }) }, current.current.token);
+    const updated = { ...current.current, nome: value.nome, email: value.email };
+    await sessionStorage.write(updated);
+    current.current = updated; setSession(updated); setError(null);
+  };
+
+  return <Context.Provider value={{
+    session, ready, error, login, logout, clear, changePassword, updateProfile, expire,
+  }}>{children}</Context.Provider>;
 }
 export const useAuth = () => useContext(Context);

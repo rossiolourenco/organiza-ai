@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import {
   Button, Card, ErrorState, IconButton, Input, Label, PasswordInput, Row,
@@ -21,6 +21,7 @@ export default function AuthScreen({ register = false }: { register?: boolean })
   const [success, setSuccess] = useState(false);
   const auth = useAuth();
   const router = useRouter();
+  const { senha: senhaAlterada } = useLocalSearchParams<{ senha?: string }>();
   const { colors } = useTheme();
 
   const submit = async () => {
@@ -85,6 +86,12 @@ export default function AuthScreen({ register = false }: { register?: boolean })
               onChangeText={setConfirmation} autoComplete="new-password" /> : null}
 
             <ErrorState message={error || auth.error} />
+            {senhaAlterada === 'alterada' ? <Row style={{ flexWrap: 'nowrap' }}>
+              <Feather name="shield" size={16} color={colors.success} />
+              <Label size="caption" style={{ color: colors.success, flex: 1 }}>
+                Senha alterada. Entre novamente com a nova credencial.
+              </Label>
+            </Row> : null}
             {success ? <Row style={{ flexWrap: 'nowrap' }}>
               <Feather name="check-circle" size={16} color={colors.success} />
               <Label size="caption" style={{ color: colors.success, flex: 1 }}>

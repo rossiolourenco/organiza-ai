@@ -13,6 +13,7 @@ import Focus from '../app/(main)/(tabs)/foco';
 import Profile from '../app/(main)/(tabs)/perfil';
 import Form from '../app/(main)/novaTarefa';
 import Categories from '../app/(main)/categorias';
+import Security from '../app/(main)/seguranca';
 import { sessionStorage } from '../src/services/sessionStorage';
 
 jest.mock('../src/services/sessionStorage', () => ({
@@ -25,6 +26,7 @@ const routes = {
   '(main)/(tabs)/planejamento': Planning, '(main)/(tabs)/foco': Focus,
   '(main)/(tabs)/perfil': Profile, '(main)/novaTarefa': Form,
   '(main)/editarTarefa': Form, '(main)/categorias': Categories,
+  '(main)/seguranca': Security,
 };
 const user = { id: 1, nome: 'DEMO Teste', email: 'teste@demo.invalid', token: 'test-token', server: 'http://localhost:8080' };
 const fetchMock = jest.fn();
@@ -80,3 +82,22 @@ test('falha de login permanece na tela e exibe mensagem', async () => {
   await screen.findByText('E-mail ou senha incorretos.');
   expect(screen.queryByText('Seu dia, com mais intenção.')).toBeNull();
 });
+
+test('troca de senha usa o endpoint seguro e confirma o encerramento da sessão', async () => {
+  jest.mocked(sessionStorage.read).mockResolvedValue(user);
+  renderRouter(routes, { initialUrl: '/home' });
+  await screen.findByText('Seu dia, com mais intenção.');
+  act(() => router.push('/seguranca'));
+  await screen.findByText('Sua senha protege todos os seus dados.');
+  fireEvent.changeText(screen.getByLabelText('Senha atual'), 'Senha-atual-2026');
+  fireEvent.changeText(screen.getByLabelText('Nova senha'), 'Nova-senha-2026');
+  fireEvent.changeText(screen.getByLabelText('Confirmar nova senha'), 'Nova-senha-2026');
+  fireEvent.press(screen.getByLabelText('Alterar minha senha'));
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+    'https://organizaai.evox.net.br/api/usuarios/senha', expect.objectContaining({
+      method: 'PUT',
+      body: JSON.stringify({ senhaAtual: 'Senha-atual-2026', novaSenha: 'Nova-senha-2026' }),
+    })));
+  await screen.findByText('Senha atualizada com sucesso.');
+  expect(screen.getByText('Entrar novamente')).toBeTruthy();
+}, 15000);

@@ -23,7 +23,7 @@ import {
 import { dayKey } from '../../domain/dates';
 
 export default function ProfileScreen() {
-  const { session, logout } = useAuth();
+  const { session, logout, updateProfile } = useAuth();
   const { tasks, categories, habits, refresh } = useData();
   const { state, ready, update, busy, error: focusError } = useFocus();
   const { settings, plans, update: updateSettings, clearPlanDay, error: settingsError } = useSettings();
@@ -37,16 +37,36 @@ export default function ProfileScreen() {
   const [leaving, setLeaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [nome, setNome] = useState(session?.nome ?? '');
+  const [salvandoNome, setSalvandoNome] = useState(false);
+  const [erroNome, setErroNome] = useState<string | null>(null);
+  const [avisoNome, setAvisoNome] = useState<string | null>(null);
 
   useEffect(() => {
     if (ready) { setTaskGoal(String(state.goals.tasks)); setFocusGoal(String(state.goals.minutes)); }
   }, [ready, state.goals]);
   useEffect(() => { setLead(String(settings.notificationLeadMinutes)); }, [settings.notificationLeadMinutes]);
+  useEffect(() => { setNome(session?.nome ?? ''); }, [session?.nome]);
+
+  const salvarNome = async () => {
+    const value = nome.trim();
+    setErroNome(null); setAvisoNome(null);
+    if (value.length < 2 || value.length > 100) {
+      setErroNome('O nome deve ter entre 2 e 100 caracteres.'); return;
+    }
+    setSalvandoNome(true);
+    try {
+      await updateProfile(value);
+      setAvisoNome('Nome atualizado com sucesso.');
+    } catch (e) {
+      setErroNome(e instanceof Error ? e.message : 'Não foi possível salvar seu nome.');
+    } finally { setSalvandoNome(false); }
+  };
 
   const a = analytics(tasks);
   const f = focusMinutes(state.sessions);
   const demo = session?.email.endsWith('@exposicao.invalid') ?? false;
-  const version = Constants.expoConfig?.version || '1.0.0';
+  const version = Constants.expoConfig?.version || '3.2.0';
 
   const save = async () => {
     const count = Number(taskGoal), minutes = Number(focusGoal);
@@ -125,6 +145,17 @@ export default function ProfileScreen() {
       </Row>
     </PremiumCard>
 
+    <Card style={{ gap: tokens.space.sm }}>
+      <Label size="subtitle">Dados pessoais</Label>
+      <Input label="Nome" value={nome} onChangeText={value => { setNome(value); setAvisoNome(null); }}
+        maxLength={100} autoComplete="name" placeholder="Seu nome" />
+      <Label muted size="micro">E-mail de acesso: {session?.email}</Label>
+      <ErrorState message={erroNome} />
+      {avisoNome ? <Label size="caption" style={{ color: colors.success }}>{avisoNome}</Label> : null}
+      <Button title="Salvar nome" icon="check" variant="secondary" loading={salvandoNome}
+        onPress={() => { void salvarNome(); }} />
+    </Card>
+
     <Row style={{ alignItems: 'stretch' }}>
       <MetricCard value={`${a.rate}%`} label="Tarefas concluídas" icon="check-circle" tone="success" />
       <MetricCard value={`${f.total} min`} label="Foco neste aparelho" icon="clock" tone="warning" />
@@ -144,6 +175,12 @@ export default function ProfileScreen() {
       <Label muted size="caption">Tema atual: {preference === 'system' ? 'sistema' : preference === 'dark' ? 'escuro' : 'claro'}.
         A preferência vale para este aparelho.</Label>
       <ThemeToggle />
+    </Card>
+
+    <Card style={{ gap: tokens.space.sm }}>
+      <Label size="subtitle">Segurança</Label>
+      <Label muted size="caption">Altere sua senha com confirmação da senha atual. Todas as sessões serão revogadas.</Label>
+      <Button title="Alterar senha" icon="lock" variant="secondary" onPress={() => router.push('/seguranca')} />
     </Card>
 
     <Card>
