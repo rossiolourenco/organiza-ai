@@ -19,6 +19,8 @@
 - `npm run export` com bundles Web/iOS/Android.
 - Gate `bash scripts/verify-premium.sh` completo.
 - Versão consistente (`VERSION` × `package.json` × `app.json`).
+- CI remoto: `mobile-quality` e `mobile-bundle` verdes em
+  https://github.com/rossiolourenco/organiza-ai/actions/runs/44764548796
 
 ## 3. O que **não** foi feito
 
