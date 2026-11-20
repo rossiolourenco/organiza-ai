@@ -57,10 +57,10 @@ Conclusão: cache do Metro pode reproduzir configuração antiga; não é regres
 - Sem teste E2E de UI (Detox/Maestro).
 - Sem publicação em produção/loja.
 - A cópia acadêmica foi preservada, não removida/renomeada.
-- Nenhum commit/push foi feito.
+- Consolidação: commit **8e2d0ec** na branch `chore/dev-standards-3.2`; PR [#1](https://github.com/rossiolourenco/organiza-ai/pull/1) aberto. Nenhuma publicação em loja foi feita.
 
 ## 8. Conclusão
 
 O Mobile 3.2 está funcional, com a API oficial, sem campo de IP, com perfil/segurança e cinco abas.
 O dev-standards está integrado e carregado. A divergência visual é ambiental (cópia/cache), não uma
-regressão do código. Aguardando autorização para commit e, se desejado, build assinado.
+regressão do código. A integração foi consolidada no GitHub via PR; build assinado e publicação em loja seguem pendentes de autorização.

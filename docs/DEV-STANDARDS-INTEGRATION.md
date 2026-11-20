@@ -77,3 +77,10 @@ Atualize `SOURCE.md`/fingerprint após a atualização e rode `npm run verify`.
 - O framework não tem tag semântica; o fingerprint é a referência.
 - A cópia é manual; exige revisão de diff.
 - A integração não altera o comportamento do app.
+
+## 7. Consolidação
+
+- Commit: `8e2d0ec`
+- Branch: `chore/dev-standards-3.2`
+- PR: https://github.com/rossiolourenco/organiza-ai/pull/1
+- Merge/publicação em loja: não executados; aguardando revisão.
