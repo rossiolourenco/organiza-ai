@@ -27,7 +27,25 @@ echo "branch: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'sem git')"
 [ -f AGENTS.md ] || fail "AGENTS.md ausente"
 [ -f opencode.json ] || fail "opencode.json ausente"
 node -e "JSON.parse(require('fs').readFileSync('opencode.json','utf8'))" || fail "opencode.json inválido"
-node -e "const p=require('./package.json'); if(p.version!=='3.2.0') process.exit(1)" || fail "versão Mobile diferente de 3.2.0"
+
+# Versão única e rastreável do release.
+[ -f VERSION ] || fail "VERSION ausente"
+RELEASE_VERSION="$(tr -d '[:space:]' < VERSION)"
+[ -n "$RELEASE_VERSION" ] || fail "VERSION vazio"
+BASE_VERSION="${RELEASE_VERSION%%-*}"
+RELEASE_VERSION="$RELEASE_VERSION" BASE_VERSION="$BASE_VERSION" node -e "
+  const p = require('./package.json');
+  const a = require('./app.json');
+  if (p.version !== process.env.RELEASE_VERSION) {
+    console.error('package.json=' + p.version + ' VERSION=' + process.env.RELEASE_VERSION);
+    process.exit(1);
+  }
+  if (a.expo.version !== process.env.BASE_VERSION) {
+    console.error('app.json=' + a.expo.version + ' esperado=' + process.env.BASE_VERSION);
+    process.exit(1);
+  }
+" || fail "versão do Mobile divergente de VERSION"
+ok "versão de release consistente ($RELEASE_VERSION, app $BASE_VERSION)"
 
 EXPECTED="$(tr -d '[:space:]' < dev-standards/FINGERPRINT)"
 if command -v sha256sum >/dev/null 2>&1; then
