@@ -2,7 +2,7 @@
   "expo": {
     "name": "Organiza Aí",
     "slug": "organiza-ai",
-    "version": "3.2.0",
+    "version": "3.3.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -13,14 +13,16 @@
       "backgroundColor": "#F7F8FC"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "buildNumber": "33"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F7F8FC"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "versionCode": 33
     },
     "web": {
       "favicon": "./assets/favicon.png"
