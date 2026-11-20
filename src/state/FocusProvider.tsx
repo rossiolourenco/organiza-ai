@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState } from 'react-native';
 import { decodeFocus, FocusState, initialFocus, mergeFocusSessions, recoverFocus, RemoteFocusSession } from '../domain/focus';
@@ -9,6 +9,7 @@ import { useAuth } from './AuthProvider';
 interface Focus {
   state: FocusState; now: number; ready: boolean; busy: boolean; error: string | null;
   update: (fn: (current: FocusState) => FocusState) => Promise<void>;
+  syncSessions: () => Promise<void>;
 }
 const Context = createContext<Focus>(null!);
 export function FocusProvider({ children }: React.PropsWithChildren) {
@@ -22,22 +23,25 @@ export function FocusProvider({ children }: React.PropsWithChildren) {
   const [error, setError] = useState<string | null>(null);
   const lock = useRef(false);
   const sentRemote = useRef<Set<string>>(new Set());
+  const syncSessions = useCallback(async () => {
+    try {
+      const remote = await request<RemoteFocusSession[]>(session!.server,
+        `/produtividade/foco?data=${dayKey()}`, {}, session!.token);
+      const merged = { ...current.current, sessions: mergeFocusSessions(current.current.sessions, remote) };
+      current.current = merged; setState(merged);
+      await AsyncStorage.setItem(key, JSON.stringify(merged));
+    } catch { /* sem conexão: mantém o histórico local */ }
+  }, [session, key]);
   useEffect(() => {
     let alive = true;
     AsyncStorage.getItem(key).then(async raw => {
       const parsed = decodeFocus(raw);
-      let recovered = recoverFocus(parsed, Date.now());
-      // Sincroniza o histórico concluído com o backend (sessões feitas em outro aparelho aparecem aqui).
-      try {
-        const remote = await request<RemoteFocusSession[]>(session!.server,
-          `/produtividade/foco?data=${dayKey()}`, {}, session!.token);
-        recovered = { ...recovered, sessions: mergeFocusSessions(recovered.sessions, remote) };
-      } catch { /* sem conexão: mantém o histórico local */ }
+      const recovered = recoverFocus(parsed, Date.now());
       if (recovered !== parsed) await AsyncStorage.setItem(key, JSON.stringify(recovered));
-      if (alive) { current.current = recovered; setState(recovered); setReady(true); }
+      if (alive) { current.current = recovered; setState(recovered); setReady(true); await syncSessions(); }
     }).catch(e => { if (alive) setError(e instanceof Error ? e.message : 'Falha ao recuperar o foco local.'); });
     return () => { alive = false; };
-  }, [key, session]);
+  }, [key, session, syncSessions]);
   // Envia ao backend cada sessão concluída (idempotente: marca antes de enviar e reverte em falha).
   useEffect(() => {
     const toPush = state.sessions.filter(s => !s.id.startsWith('r') && !sentRemote.current.has(s.id));
@@ -79,6 +83,6 @@ export function FocusProvider({ children }: React.PropsWithChildren) {
     const subscription = AppState.addEventListener('change', s => { if (s === 'active') tick(); });
     return () => { clearInterval(interval); subscription.remove(); };
   }, [key, ready]);
-  return <Context.Provider value={{ state, now, ready, busy, error, update }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ state, now, ready, busy, error, update, syncSessions }}>{children}</Context.Provider>;
 }
 export const useFocus = () => useContext(Context);

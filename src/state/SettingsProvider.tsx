@@ -23,6 +23,7 @@ interface SettingsValue {
   acceptPlan: (date: string, ids: number[]) => Promise<void>;
   dismissSuggestion: (date: string, id: number) => Promise<void>;
   clearPlanDay: (date: string) => Promise<void>;
+  syncPlan: (date: string) => Promise<void>;
 }
 const Context = createContext<SettingsValue>(null!);
 
@@ -92,22 +93,20 @@ export function SettingsProvider({ children }: React.PropsWithChildren) {
         { method: 'PUT', body: JSON.stringify({ data: date, itens, versao: atual?.versao ?? 0 }) }, session.token);
     } catch { /* mantém local */ }
   }, [session]);
+  // Sincroniza o plano de uma data com o backend (fonte de verdade), sem sobrescrever ao falhar.
+  const syncPlan = useCallback(async (date: string) => {
+    if (!session) return;
+    try {
+      const remote = await request<Planejamento>(session.server,
+        `/produtividade/planejamento?data=${encodeURIComponent(date)}`, {}, session.token);
+      if (remote && remote.id != null) {
+        const ids = remote.itens.map(item => item.tarefaId);
+        setPlans(prev => ({ ...prev, accepted: { ...prev.accepted, [date]: ids } }));
+      }
+    } catch { /* mantém local */ }
+  }, [session]);
   // Ao ficar pronto, sincroniza o plano de hoje vindo de outro aparelho.
-  useEffect(() => {
-    if (!ready || !session) return;
-    let alive = true;
-    (async () => {
-      try {
-        const remote = await request<Planejamento>(session.server,
-          `/produtividade/planejamento?data=${encodeURIComponent(dayKey())}`, {}, session.token);
-        if (alive && remote && remote.id != null) {
-          const ids = remote.itens.map(item => item.tarefaId);
-          setPlans(prev => ({ ...prev, accepted: { ...prev.accepted, [dayKey()]: ids } }));
-        }
-      } catch { /* mantém local */ }
-    })();
-    return () => { alive = false; };
-  }, [ready, session]);
+  useEffect(() => { if (ready) { void syncPlan(dayKey()); } }, [ready, syncPlan]);
   const acceptPlan = async (date: string, ids: number[]) => {
     const unique = [...new Set(ids)];
     await savePlans({ ...plans, accepted: { ...plans.accepted, [date]: unique } });
@@ -125,7 +124,7 @@ export function SettingsProvider({ children }: React.PropsWithChildren) {
     void pushRemotePlan(date, []);
   };
 
-  return <Context.Provider value={{ settings, plans, ready, error, update, acceptPlan, dismissSuggestion, clearPlanDay }}>
+  return <Context.Provider value={{ settings, plans, ready, error, update, acceptPlan, dismissSuggestion, clearPlanDay, syncPlan }}>
     {children}
   </Context.Provider>;
 }
