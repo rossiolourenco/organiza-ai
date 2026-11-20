@@ -1,6 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from './AuthProvider';
+import { request } from '../services/api';
+import { Planejamento, PlanejamentoItem } from '../types/models';
+import { dayKey } from '../domain/dates';
 
 export interface Settings {
   availabilityMinutes: number;
@@ -20,6 +23,7 @@ interface SettingsValue {
   acceptPlan: (date: string, ids: number[]) => Promise<void>;
   dismissSuggestion: (date: string, id: number) => Promise<void>;
   clearPlanDay: (date: string) => Promise<void>;
+  syncPlan: (date: string) => Promise<void>;
 }
 const Context = createContext<SettingsValue>(null!);
 
@@ -78,9 +82,35 @@ export function SettingsProvider({ children }: React.PropsWithChildren) {
   const savePlans = async (next: PlanPreferences) => {
     await persist(planKey, next); setPlans(next); setError(null);
   };
+  // Centraliza o plano no backend (fonte de verdade). Em falha, o plano permanece local.
+  const pushRemotePlan = useCallback(async (date: string, ids: number[]) => {
+    if (!session) return;
+    try {
+      const atual = await request<Planejamento>(session.server,
+        `/produtividade/planejamento?data=${encodeURIComponent(date)}`, {}, session.token);
+      const itens: PlanejamentoItem[] = ids.map((id, ordem) => ({ tarefaId: id, ordem, minutosEstimados: 30 }));
+      await request<Planejamento>(session.server, '/produtividade/planejamento',
+        { method: 'PUT', body: JSON.stringify({ data: date, itens, versao: atual?.versao ?? 0 }) }, session.token);
+    } catch { /* mantém local */ }
+  }, [session]);
+  // Sincroniza o plano de uma data com o backend (fonte de verdade), sem sobrescrever ao falhar.
+  const syncPlan = useCallback(async (date: string) => {
+    if (!session) return;
+    try {
+      const remote = await request<Planejamento>(session.server,
+        `/produtividade/planejamento?data=${encodeURIComponent(date)}`, {}, session.token);
+      if (remote && remote.id != null) {
+        const ids = remote.itens.map(item => item.tarefaId);
+        setPlans(prev => ({ ...prev, accepted: { ...prev.accepted, [date]: ids } }));
+      }
+    } catch { /* mantém local */ }
+  }, [session]);
+  // Ao ficar pronto, sincroniza o plano de hoje vindo de outro aparelho.
+  useEffect(() => { if (ready) { void syncPlan(dayKey()); } }, [ready, syncPlan]);
   const acceptPlan = async (date: string, ids: number[]) => {
     const unique = [...new Set(ids)];
     await savePlans({ ...plans, accepted: { ...plans.accepted, [date]: unique } });
+    void pushRemotePlan(date, unique);
   };
   const dismissSuggestion = async (date: string, id: number) => {
     const current = plans.dismissed[date] || [];
@@ -91,9 +121,10 @@ export function SettingsProvider({ children }: React.PropsWithChildren) {
     const accepted = { ...plans.accepted }; delete accepted[date];
     const dismissed = { ...plans.dismissed }; delete dismissed[date];
     await savePlans({ accepted, dismissed });
+    void pushRemotePlan(date, []);
   };
 
-  return <Context.Provider value={{ settings, plans, ready, error, update, acceptPlan, dismissSuggestion, clearPlanDay }}>
+  return <Context.Provider value={{ settings, plans, ready, error, update, acceptPlan, dismissSuggestion, clearPlanDay, syncPlan }}>
     {children}
   </Context.Provider>;
 }

@@ -14,7 +14,7 @@ import { tokens, useTheme } from '../../theme/ThemeProvider';
 const labels: Record<FocusMode, string> = { focus: 'Foco', short: 'Pausa curta', long: 'Pausa longa' };
 
 export default function FocusScreen() {
-  const { state, now, ready, busy, error, update } = useFocus();
+  const { state, now, ready, busy, error, update, syncSessions } = useFocus();
   const { tasks } = useData();
   const router = useRouter();
   const [mode, setMode] = useState<FocusMode>('focus');
@@ -26,6 +26,9 @@ export default function FocusScreen() {
   const [cancel, setCancel] = useState(false);
   const { colors } = useTheme();
   const reminder = useRef<string | null>(null);
+
+  // Re-sincroniza as sessões concluídas (outro aparelho pode ter registrado).
+  useEffect(() => { void syncSessions(); }, [syncSessions]);
 
   useEffect(() => {
     if (ready) setDurations({ focus: String(state.durations.focus), short: String(state.durations.short),
@@ -88,6 +91,7 @@ export default function FocusScreen() {
   };
 
   return <Screen title="Uma coisa de cada vez." subtitle="Proteja sua atenção. Faça uma pausa. Recomece."
+    refreshing={false} onRefresh={() => { void syncSessions(); }}
     action={<IconButton icon="sliders" label="Durações das sessões" onPress={() => setSettings(true)} />}>
     <ErrorState message={message || error} />
     {!ready ? <LoadingSkeleton rows={2} label="Preparando seu foco" /> : <>

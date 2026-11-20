@@ -2,7 +2,7 @@
   "expo": {
     "name": "Organiza Aí",
     "slug": "organiza-ai",
-    "version": "3.3.0",
+    "version": "3.3.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "33"
+      "buildNumber": "34"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,7 @@
         "backgroundColor": "#F7F8FC"
       },
       "edgeToEdgeEnabled": true,
-      "versionCode": 33
+      "versionCode": 34
     },
     "web": {
       "favicon": "./assets/favicon.png"

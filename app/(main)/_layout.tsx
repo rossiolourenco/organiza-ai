@@ -4,6 +4,7 @@ import { DataProvider } from '../../src/state/DataProvider';
 import { FocusProvider } from '../../src/state/FocusProvider';
 import { SettingsProvider } from '../../src/state/SettingsProvider';
 import { ReminderSync } from '../../src/features/notifications/ReminderSync';
+import { RevalidateOnActive } from '../../src/state/RevalidateOnActive';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { useAuth } from '../../src/state/AuthProvider';
 
@@ -17,6 +18,7 @@ export default function MainLayout() {
     <SettingsProvider>
       <FocusProvider>
         <ReminderSync />
+        <RevalidateOnActive />
         <Stack initialRouteName="(tabs)" screenOptions={{ headerShown: false,
           contentStyle: { backgroundColor: colors.background } }}>
           <Stack.Screen name="(tabs)" />

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
@@ -22,7 +22,7 @@ type CalendarMode = 'month' | 'week' | 'day';
 
 export default function PlanningScreen() {
   const { tasks, loading, refresh } = useData();
-  const { settings, plans, update, acceptPlan, dismissSuggestion, clearPlanDay, error: settingsError } = useSettings();
+  const { settings, plans, update, acceptPlan, dismissSuggestion, clearPlanDay, syncPlan, error: settingsError } = useSettings();
   const [mode, setMode] = useState<Mode>('calendar');
   const [calendarMode, setCalendarMode] = useState<CalendarMode>('month');
   const [quadrantFilter, setQuadrantFilter] = useState<Quadrant | ''>('');
@@ -76,11 +76,14 @@ export default function PlanningScreen() {
     } catch { setError('Não foi possível salvar as preferências.'); }
   };
 
+  // Re-sincroniza o plano ao abrir a tela (outro aparelho pode ter alterado).
+  useEffect(() => { void syncPlan(dayKey()); }, [syncPlan]);
+
   const eisenhower = matrix(tasks);
   const columns: Status[] = ['PENDENTE', 'EM_ANDAMENTO', 'CONCLUIDA'];
 
   return <Screen title="Planeje com clareza." subtitle="Calendário, Kanban, plano inteligente e matriz."
-    refreshing={loading} onRefresh={() => { void refresh(); }}
+    refreshing={loading} onRefresh={() => { void refresh(); void syncPlan(dayKey()); }}
     action={<Button title="Ajustes" icon="sliders" variant="secondary" compact onPress={openPlanSettings} />}>
     <DataFeedback />
     <Segmented value={mode} onChange={value => setMode(value)} options={[

@@ -63,7 +63,38 @@ export function finishEarly(timer: Timer, now: number): FocusSession | null {
 }
 export function focusMinutes(sessions: FocusSession[], today = dayKey()) {
   const focus = sessions.filter(s => s.mode === 'focus');
-  const sum = (items: FocusSession[]) => Math.floor(items.reduce((n, s) => n + s.duration, 0) / 60000);
+  // Mesma regra do backend: arredonda cada sessão para o minuto mais próximo (mínimo 1).
+  const minutos = (ms: number) => Math.max(1, Math.round(ms / 60000));
+  const sum = (items: FocusSession[]) => items.reduce((n, s) => n + minutos(s.duration), 0);
   return { total: sum(focus), today: sum(focus.filter(s => dayKey(new Date(s.completedAt)) === today)),
     week: sum(focus.filter(s => { const d = dayKey(new Date(s.completedAt)); return d >= weekStart(today) && d <= today; })) };
+}
+
+export interface RemoteFocusSession { id: number; minutos: number; data: string; iniciadaEm: string; tarefaId: number | null }
+
+/**
+ * Une sessões locais e remotas sem duplicar a mesma sessão já sincronizada.
+ * A chave de deduplicação usa tarefa + minutos + minuto de conclusão.
+ */
+// Janela curta: a cópia remota grava segundos depois; sessões legítimas distantes não se fundem.
+const TOLERANCIA_MS = 60 * 1000;
+
+export function mergeFocusSessions(local: FocusSession[], remote: RemoteFocusSession[]): FocusSession[] {
+  const minutos = (ms: number) => Math.max(1, Math.round(ms / 60000));
+  const out: FocusSession[] = [];
+  for (const s of local) {
+    // Remove duplicatas internas da mesma sessão (tarefa + minutos + janela de tempo).
+    const repetida = out.some(o => o.mode === s.mode && o.taskId === s.taskId &&
+      minutos(o.duration) === minutos(s.duration) && Math.abs(o.completedAt - s.completedAt) <= TOLERANCIA_MS);
+    if (!repetida) out.push(s);
+  }
+  for (const r of remote) {
+    const completedAt = Date.parse(r.iniciadaEm);
+    const jaExiste = out.some(o => o.taskId === r.tarefaId && minutos(o.duration) === r.minutos &&
+      Math.abs(o.completedAt - completedAt) <= TOLERANCIA_MS);
+    if (!jaExiste) {
+      out.push({ id: `r${r.id}`, mode: 'focus', duration: r.minutos * 60000, completedAt, taskId: r.tarefaId });
+    }
+  }
+  return out.sort((a, b) => a.completedAt - b.completedAt);
 }

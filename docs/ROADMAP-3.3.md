@@ -11,6 +11,12 @@ Base: 3.2.0 em produção; dev-standards integrado; CI em `.github/workflows/ci.
 - Preservar login sem IP, cinco abas, dashboard, perfil e segurança.
 - Não remover funcionalidades; não trocar stack sem ADR.
 
+## Paridade 3.3.1
+
+- Nenhuma funcionalidade de negócio ausente no Mobile (auditoria em `docs/MOBILE-PARITY-3.3.1.md`).
+- Revalidação ao retomar o app (`RevalidateOnActive`) com throttle e teste.
+- Matriz completa no repositório Web: `docs/FUNCTIONAL-PARITY-3.3.1.md`.
+
 ## Status de execução (RC 3.3)
 
 **Concluído neste RC:** versão `3.3.0-rc.1`/loja `3.3.0`, gate validando `package.json` ×

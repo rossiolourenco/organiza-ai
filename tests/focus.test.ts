@@ -36,3 +36,13 @@ test('encerrar antes do fim registra apenas o tempo decorrido', () => {
   const paused = pauseTimer(longTimer, 61000);
   expect(elapsed(paused, 90000)).toBe(60000);
 });
+
+test('arredonda minutos por sessão, consistente com o backend', () => {
+  const completedAt = Date.parse('2026-11-17T12:00:00Z');
+  const stats = focusMinutes([
+    { id: 'a', mode: 'focus', duration: 1500000, completedAt, taskId: null },
+    { id: 'b', mode: 'focus', duration: 100000, completedAt, taskId: null },
+  ], '2026-11-17');
+  // 25 min + round(1,66) = 2 => 27 (o cálculo antigo por total daria 26).
+  expect(stats.total).toBe(27);
+});
