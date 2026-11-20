@@ -27,7 +27,9 @@ export function FocusProvider({ children }: React.PropsWithChildren) {
     try {
       const remote = await request<RemoteFocusSession[]>(session!.server,
         `/produtividade/foco?data=${dayKey()}`, {}, session!.token);
-      const merged = { ...current.current, sessions: mergeFocusSessions(current.current.sessions, remote) };
+      // Reconstrói a partir das sessões locais (sem cópias remotas antigas) + remotas deduplicadas.
+      const locais = current.current.sessions.filter(s => !s.id.startsWith('r'));
+      const merged = { ...current.current, sessions: mergeFocusSessions(locais, remote) };
       current.current = merged; setState(merged);
       await AsyncStorage.setItem(key, JSON.stringify(merged));
     } catch { /* sem conexão: mantém o histórico local */ }

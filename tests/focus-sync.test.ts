@@ -34,3 +34,13 @@ describe('mergeFocusSessions', () => {
     expect(merged.map(s => s.id)).toEqual(['r10', 'r9']);
   });
 });
+
+it('não duplica a sessão local quando o servidor grava segundos depois', () => {
+  const local = [{ id: 'l1', mode: 'focus' as const, duration: 100000,
+    completedAt: Date.parse('2026-11-20T18:31:58Z'), taskId: 2 }];
+  const remote = [{ id: 3, minutos: 2, data: '2026-11-20',
+    iniciadaEm: '2026-11-20T18:32:00Z', tarefaId: 2 }];
+  const merged = mergeFocusSessions(local, remote);
+  expect(merged.length).toBe(1);
+  expect(merged[0].id).toBe('l1');
+});

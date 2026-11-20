@@ -76,20 +76,24 @@ export interface RemoteFocusSession { id: number; minutos: number; data: string;
  * Une sessões locais e remotas sem duplicar a mesma sessão já sincronizada.
  * A chave de deduplicação usa tarefa + minutos + minuto de conclusão.
  */
+const TOLERANCIA_MS = 5 * 60000;
+
 export function mergeFocusSessions(local: FocusSession[], remote: RemoteFocusSession[]): FocusSession[] {
-  const seen = new Set<string>();
+  const minutos = (ms: number) => Math.max(1, Math.round(ms / 60000));
   const out: FocusSession[] = [];
   for (const s of local) {
-    const key = `${s.taskId ?? 0}:${Math.floor(s.duration / 60000)}:${Math.floor(s.completedAt / 60000)}`;
-    if (seen.has(key)) continue;
-    seen.add(key); out.push(s);
+    // Remove duplicatas internas da mesma sessão (tarefa + minutos + janela de tempo).
+    const repetida = out.some(o => o.mode === s.mode && o.taskId === s.taskId &&
+      minutos(o.duration) === minutos(s.duration) && Math.abs(o.completedAt - s.completedAt) <= TOLERANCIA_MS);
+    if (!repetida) out.push(s);
   }
   for (const r of remote) {
     const completedAt = Date.parse(r.iniciadaEm);
-    const key = `${r.tarefaId ?? 0}:${r.minutos}:${Math.floor(completedAt / 60000)}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push({ id: `r${r.id}`, mode: 'focus', duration: r.minutos * 60000, completedAt, taskId: r.tarefaId });
+    const jaExiste = out.some(o => o.taskId === r.tarefaId && minutos(o.duration) === r.minutos &&
+      Math.abs(o.completedAt - completedAt) <= TOLERANCIA_MS);
+    if (!jaExiste) {
+      out.push({ id: `r${r.id}`, mode: 'focus', duration: r.minutos * 60000, completedAt, taskId: r.tarefaId });
+    }
   }
   return out.sort((a, b) => a.completedAt - b.completedAt);
 }
