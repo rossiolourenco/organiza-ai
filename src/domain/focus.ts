@@ -67,3 +67,27 @@ export function focusMinutes(sessions: FocusSession[], today = dayKey()) {
   return { total: sum(focus), today: sum(focus.filter(s => dayKey(new Date(s.completedAt)) === today)),
     week: sum(focus.filter(s => { const d = dayKey(new Date(s.completedAt)); return d >= weekStart(today) && d <= today; })) };
 }
+
+export interface RemoteFocusSession { id: number; minutos: number; data: string; iniciadaEm: string; tarefaId: number | null }
+
+/**
+ * Une sessões locais e remotas sem duplicar a mesma sessão já sincronizada.
+ * A chave de deduplicação usa tarefa + minutos + minuto de conclusão.
+ */
+export function mergeFocusSessions(local: FocusSession[], remote: RemoteFocusSession[]): FocusSession[] {
+  const seen = new Set<string>();
+  const out: FocusSession[] = [];
+  for (const s of local) {
+    const key = `${s.taskId ?? 0}:${Math.floor(s.duration / 60000)}:${Math.floor(s.completedAt / 60000)}`;
+    if (seen.has(key)) continue;
+    seen.add(key); out.push(s);
+  }
+  for (const r of remote) {
+    const completedAt = Date.parse(r.iniciadaEm);
+    const key = `${r.tarefaId ?? 0}:${r.minutos}:${Math.floor(completedAt / 60000)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ id: `r${r.id}`, mode: 'focus', duration: r.minutos * 60000, completedAt, taskId: r.tarefaId });
+  }
+  return out.sort((a, b) => a.completedAt - b.completedAt);
+}

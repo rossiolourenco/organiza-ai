@@ -48,3 +48,7 @@ export function defaultDetails(): TaskDetails {
     fusoHorario: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo',
     importante: null, urgente: null, duracaoEstimada: null };
 }
+
+export interface PlanejamentoItem { tarefaId: number; ordem: number; minutosEstimados: number }
+export interface Planejamento { id: number | null; data: string; itens: PlanejamentoItem[]; versao: number }
+export interface FocoSession { id: number; minutos: number; data: string; iniciadaEm: string; tarefaId: number | null }

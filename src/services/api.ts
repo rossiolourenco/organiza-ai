@@ -1,4 +1,4 @@
-import { Category, Habit, HabitInput, Session, Task, TaskInput } from '../types/models';
+import { Category, FocoSession, Habit, HabitInput, Planejamento, PlanejamentoItem, Session, Task, TaskInput } from '../types/models';
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) { super(message); }
@@ -75,6 +75,15 @@ export class Api {
     return this.call<Habit>(`/habitos${id ? `/${id}` : ''}`, id ? 'PUT' : 'POST', input);
   }
   deleteHabit(id: number) { return this.call<void>(`/habitos/${id}`, 'DELETE'); }
+
+  planejamento(data: string) { return this.call<Planejamento>(`/produtividade/planejamento?data=${encodeURIComponent(data)}`); }
+  salvarPlanejamento(data: string, itens: PlanejamentoItem[], versao: number) {
+    return this.call<Planejamento>('/produtividade/planejamento', 'PUT', { data, itens, versao });
+  }
+  focoSessoes(data: string) { return this.call<FocoSession[]>(`/produtividade/foco?data=${encodeURIComponent(data)}`); }
+  registrarFoco(minutos: number, tarefaId: number | null, data: string) {
+    return this.call<FocoSession>('/produtividade/foco', 'POST', { minutos, tarefaId, data });
+  }
   setHabitRecord(id: number, date: string, done: boolean) {
     return done
       ? this.call<Habit>(`/habitos/${id}/registros`, 'POST', { data: date })

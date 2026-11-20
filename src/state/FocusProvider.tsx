@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState } from 'react-native';
-import { decodeFocus, FocusState, initialFocus, recoverFocus } from '../domain/focus';
+import { decodeFocus, FocusState, initialFocus, mergeFocusSessions, recoverFocus, RemoteFocusSession } from '../domain/focus';
+import { request } from '../services/api';
+import { dayKey } from '../domain/dates';
 import { useAuth } from './AuthProvider';
 
 interface Focus {
@@ -19,16 +21,34 @@ export function FocusProvider({ children }: React.PropsWithChildren) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lock = useRef(false);
+  const sentRemote = useRef<Set<string>>(new Set());
   useEffect(() => {
     let alive = true;
     AsyncStorage.getItem(key).then(async raw => {
       const parsed = decodeFocus(raw);
-      const recovered = recoverFocus(parsed, Date.now());
+      let recovered = recoverFocus(parsed, Date.now());
+      // Sincroniza o histórico concluído com o backend (sessões feitas em outro aparelho aparecem aqui).
+      try {
+        const remote = await request<RemoteFocusSession[]>(session!.server,
+          `/produtividade/foco?data=${dayKey()}`, {}, session!.token);
+        recovered = { ...recovered, sessions: mergeFocusSessions(recovered.sessions, remote) };
+      } catch { /* sem conexão: mantém o histórico local */ }
       if (recovered !== parsed) await AsyncStorage.setItem(key, JSON.stringify(recovered));
       if (alive) { current.current = recovered; setState(recovered); setReady(true); }
     }).catch(e => { if (alive) setError(e instanceof Error ? e.message : 'Falha ao recuperar o foco local.'); });
     return () => { alive = false; };
-  }, [key]);
+  }, [key, session]);
+  // Envia ao backend cada sessão concluída (idempotente: marca antes de enviar e reverte em falha).
+  useEffect(() => {
+    const toPush = state.sessions.filter(s => !s.id.startsWith('r') && !sentRemote.current.has(s.id));
+    for (const s of toPush) {
+      sentRemote.current.add(s.id);
+      const minutos = Math.max(1, Math.round(s.duration / 60000));
+      void request(session!.server, '/produtividade/foco',
+        { method: 'POST', body: JSON.stringify({ minutos, tarefaId: s.taskId, data: dayKey(new Date(s.completedAt)) }) },
+        session!.token).catch(() => { sentRemote.current.delete(s.id); });
+    }
+  }, [state.sessions, session]);
   const update = async (fn: (value: FocusState) => FocusState) => {
     if (!ready || lock.current) throw new Error('Aguarde a gravação local.');
     lock.current = true; setBusy(true);
