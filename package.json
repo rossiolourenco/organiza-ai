@@ -11,7 +11,8 @@
     "lint": "eslint app src tests",
     "test": "jest --runInBand",
     "doctor": "npx expo-doctor",
-    "export": "expo export --platform all"
+    "export": "expo export --platform all",
+    "verify": "bash scripts/verify-premium.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
