@@ -22,8 +22,20 @@
 - **Validação 3.2:** `docs/VALIDATION-REPORT.md`
 - **Roadmap 3.3:** `docs/ROADMAP-3.3.md`
 
-A versão atual é **3.2.0** (TypeScript/Expo SDK 54), com login sem IP, dashboard Premium, cinco abas,
-perfil e segurança. As notas acadêmicas abaixo são históricas.
+### Release Candidate 3.3
+
+- **Release Mobile:** `docs/RELEASE-3.3-RC.md`
+- **Aceitação funcional:** `docs/FUNCTIONAL-ACCEPTANCE.md`
+- **Prontidão:** `docs/PRODUCTION-READINESS.md`
+- **Handoff:** `docs/RELEASE-HANDOFF.md`
+- **Documentos canônicos (Web/Admin):** `../organiza-ai-web/docs/RELEASE-3.3-RC.md`,
+  `SECURITY-REVIEW.md`, `WEB-MOBILE-PARITY.md`, `DATABASE-MIGRATION-PLAN.md`,
+  `PRODUCTION-DEPLOYMENT.md`, `ROLLBACK-PLAN.md`, `POST-DEPLOY-VALIDATION.md`
+- **Artefato:** `bash scripts/build-release.sh` (gera `dist-release/`, fora do Git)
+
+A versão em produção é **3.2.0**; o **3.3 Release Candidate** (`3.3.0-rc.1`) está preparado e não
+publicado. O app mantém login sem IP, dashboard Premium, cinco abas, perfil e segurança. As notas
+acadêmicas abaixo são históricas.
 
 ---
 

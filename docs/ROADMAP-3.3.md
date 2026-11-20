@@ -1,7 +1,8 @@
 # Roadmap 3.3 — Mobile
 
-Status: planejamento. Nada deste roadmap é implementado nesta entrega de CI.
-Base: 3.2.0; dev-standards integrado; CI em `.github/workflows/ci.yml`.
+Status: **execução parcial no RC 3.3**. Versão, artefato e gate foram fechados; o app não teve
+mudança funcional nesta rodada.
+Base: 3.2.0 em produção; dev-standards integrado; CI em `.github/workflows/ci.yml`.
 
 ## Guardrails
 
@@ -9,6 +10,16 @@ Base: 3.2.0; dev-standards integrado; CI em `.github/workflows/ci.yml`.
 - Toda mudança em branch + PR; checks obrigatórios.
 - Preservar login sem IP, cinco abas, dashboard, perfil e segurança.
 - Não remover funcionalidades; não trocar stack sem ADR.
+
+## Status de execução (RC 3.3)
+
+**Concluído neste RC:** versão `3.3.0-rc.1`/loja `3.3.0`, gate validando `package.json` ×
+`app.json` × `VERSION`, script de artefato com checksum, documentação de release/prontidão/handoff
+e reexecução completa da qualidade (Jest 50/50, typecheck, lint, Expo Doctor 18/18, export).
+
+**Pendente (ordem recomendada):** upgrade do Expo SDK/expo-router (P0 de plataforma), build
+assinado e teste em aparelho físico (P0 para loja), refresh token/MFA/recuperação (P1),
+Detox/Maestro (P2), Prettier (P2), offline explícito (P3).
 
 ## P0 — Segurança crítica
 

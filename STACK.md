@@ -1,9 +1,10 @@
 # STACK.md — Organiza Aí Mobile
 
-- **Projeto:** Organiza Aí Mobile 3.2
+- **Projeto:** Organiza Aí Mobile 3.3 RC
 - **Data da decisão:** 2026-11-20
 - **Responsável:** decisão do usuário no prompt 3.2 (projeto existente)
-- **Situação:** projeto já em desenvolvimento; stack detectada e preservada
+- **Situação:** projeto em desenvolvimento; stack detectada e preservada. Release Candidate 3.3
+  (`3.3.0-rc.1`) preparado; publicação em loja pendente de build assinado.
 
 ## Stack
 
@@ -16,8 +17,8 @@
 | Banco | PostgreSQL via API; nenhum banco local no app | dados no servidor |
 | Sessão | Expo SecureStore (nativo); memória na prévia Web | segurança de credencial |
 | API | `https://organizaai.evox.net.br/api` por padrão | produção |
-| Testes | Jest + Testing Library; ESLint; typecheck | suíte existente |
-| Distribuição | Expo/EAS; ainda sem build assinado publicado em loja | pendência de release |
+| Testes | Jest + Testing Library; ESLint; typecheck; Expo Doctor | suíte existente |
+| Distribuição | Expo/EAS; build assinado pendente de credenciais Apple/Google | pendência de release |
 
 ## Alternativas consideradas
 
@@ -36,6 +37,10 @@ navegador/estado.
 - Hábitos, tarefas, categorias e revisão dependem do backend.
 - Não há modo offline completo.
 - Não publicar em loja sem build assinado e autorização.
+- Versão centralizada em `VERSION`; o gate valida `package.json` e `app.json`.
+- Artefato de homologação em `dist-release/` (fora do Git) via `scripts/build-release.sh`.
+- Dependências com advisories de DoS (deep link/build) exigem upgrade do Expo SDK — P0 do 3.4.
+- Teste em aparelho físico e build assinado continuam pendentes.
 
 ## Referências
 
