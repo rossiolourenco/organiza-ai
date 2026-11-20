@@ -55,6 +55,7 @@ Conclusão: cache do Metro pode reproduzir configuração antiga; não é regres
 - Sem aparelho físico iOS/Android nesta execução.
 - Sem build assinado em loja.
 - Sem teste E2E de UI (Detox/Maestro).
+- CI GitHub Actions configurado; o resultado remoto é registrado no PR/relatório final.
 - Sem publicação em produção/loja.
 - A cópia acadêmica foi preservada, não removida/renomeada.
 - Consolidação: commit **8e2d0ec** na branch `chore/dev-standards-3.2`; PR [#1](https://github.com/rossiolourenco/organiza-ai/pull/1) aberto. Nenhuma publicação em loja foi feita.

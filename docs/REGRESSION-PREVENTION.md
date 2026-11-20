@@ -50,3 +50,13 @@ checkout → setup Node → npm ci → npm run typecheck → npm run lint → np
 ```
 
 Adicionar EAS/build e Detox em etapa separada. O gate atual já é compatível com CI.
+
+## 5. GitHub Actions
+
+O workflow `CI Mobile` executa em PR/push para `main` e sob demanda:
+
+- `mobile-quality` — gate `bash scripts/verify-premium.sh static` + `npm run doctor`;
+- `mobile-bundle` — `npm run export` + verificação dos bundles.
+
+Os gates usam o manifesto `dev-standards/MANIFEST.sha256` e o `FINGERPRINT`, sem caminhos
+absolutos. A branch `main` deve exigir os dois checks, PR e bloquear force push/exclusão.

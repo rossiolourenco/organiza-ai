@@ -4,25 +4,47 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 CANON="/Users/rossiolourenco/Framework-Projetos/dev-standards"
+MODE="${1:-full}"
+MODE="${MODE#--}"
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 ok() { echo "OK: $*"; }
 
-echo "== Organiza Aí Mobile — premium gate =="
+case "$MODE" in
+  full|static) ;;
+  *) echo "uso: $0 [full|static]" >&2; exit 2 ;;
+esac
+
+echo "== Organiza Aí Mobile — premium gate ($MODE) =="
 echo "commit: $(git rev-parse --short HEAD 2>/dev/null || echo 'sem git')"
 echo "branch: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'sem git')"
 
-# Framework e versão.
+# Framework: arquivos essenciais, manifesto e fingerprint portáveis.
 [ -f dev-standards/AI-GUIDELINES.md ] || fail "dev-standards/AI-GUIDELINES.md ausente"
+[ -f dev-standards/MANIFEST.sha256 ] || fail "dev-standards/MANIFEST.sha256 ausente"
+[ -f dev-standards/FINGERPRINT ] || fail "dev-standards/FINGERPRINT ausente"
 [ -f STACK.md ] || fail "STACK.md ausente"
 [ -f AGENTS.md ] || fail "AGENTS.md ausente"
 [ -f opencode.json ] || fail "opencode.json ausente"
 node -e "JSON.parse(require('fs').readFileSync('opencode.json','utf8'))" || fail "opencode.json inválido"
 node -e "const p=require('./package.json'); if(p.version!=='3.2.0') process.exit(1)" || fail "versão Mobile diferente de 3.2.0"
+
+EXPECTED="$(tr -d '[:space:]' < dev-standards/FINGERPRINT)"
+if command -v sha256sum >/dev/null 2>&1; then
+  ACTUAL="$(sha256sum dev-standards/MANIFEST.sha256 | awk '{print $1}')"
+  [ "$ACTUAL" = "$EXPECTED" ] || fail "fingerprint do manifesto divergente"
+  (cd dev-standards && sha256sum -c MANIFEST.sha256 >/dev/null) || fail "manifesto do dev-standards inválido"
+else
+  ACTUAL="$(shasum -a 256 dev-standards/MANIFEST.sha256 | awk '{print $1}')"
+  [ "$ACTUAL" = "$EXPECTED" ] || fail "fingerprint do manifesto divergente"
+  (cd dev-standards && shasum -a 256 -c MANIFEST.sha256 >/dev/null) || fail "manifesto do dev-standards inválido"
+fi
+ok "dev-standards íntegro pelo manifesto/fingerprint"
+
 if [ -d "$CANON" ]; then
-  while IFS= read -r file; do
-    cmp -s "$CANON/$file" "dev-standards/$file" || fail "dev-standards divergente: $file"
-  done < <(cd "$CANON" && find . -type f -not -name '.DS_Store' | sed 's#^\./##' | sort)
+  diff -rq --exclude=.DS_Store --exclude=SOURCE.md --exclude=PROJECT-SCOPE.md \
+    --exclude=MANIFEST.sha256 --exclude=FINGERPRINT "$CANON" dev-standards >/dev/null \
+    || fail "dev-standards divergente da fonte canônica"
   ok "dev-standards idêntico à fonte canônica"
 fi
 
@@ -50,7 +72,15 @@ echo "== Lint =="
 npm run lint
 echo "== Testes =="
 npm test -- --silent
-echo "== Export =="
-npm run export
 
-ok "gate Mobile concluído"
+if [ "$MODE" = "full" ]; then
+  echo "== Export =="
+  npm run export
+  [ -f dist/metadata.json ] || fail "metadata do export ausente"
+  find dist/_expo/static/js/web -name '*.js' | grep -q . || fail "bundle Web ausente"
+  find dist/_expo/static/js/ios -name '*.hbc' | grep -q . || fail "bundle iOS ausente"
+  find dist/_expo/static/js/android -name '*.hbc' | grep -q . || fail "bundle Android ausente"
+  ok "bundles Web/iOS/Android exportados"
+fi
+
+ok "gate Mobile concluído ($MODE)"

@@ -1,0 +1,68 @@
+name: CI Mobile
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-mobile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile-quality:
+    name: mobile-quality
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      EXPO_NO_TELEMETRY: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Static premium gate
+        run: bash scripts/verify-premium.sh static
+      - name: Expo Doctor
+        run: npm run doctor
+
+  mobile-bundle:
+    name: mobile-bundle
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      EXPO_NO_TELEMETRY: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Export bundles
+        run: npm run export
+      - name: Verify exported bundles
+        run: |
+          test -f dist/metadata.json
+          find dist/_expo/static/js/web -name '*.js' | grep -q .
+          find dist/_expo/static/js/ios -name '*.hbc' | grep -q .
+          find dist/_expo/static/js/android -name '*.hbc' | grep -q .

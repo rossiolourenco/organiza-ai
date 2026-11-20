@@ -84,3 +84,15 @@ Atualize `SOURCE.md`/fingerprint após a atualização e rode `npm run verify`.
 - Branch: `chore/dev-standards-3.2`
 - PR: https://github.com/rossiolourenco/organiza-ai/pull/1
 - Merge/publicação em loja: não executados; aguardando revisão.
+
+## 8. CI/CD
+
+- Workflow: `.github/workflows/ci.yml` (`CI Mobile`).
+- Triggers: PR para `main`, push em `main` e `workflow_dispatch`.
+- Jobs: `mobile-quality`, `mobile-bundle`.
+- Permissões: `contents: read`; checkout com `persist-credentials: false`.
+- Actions fixadas por SHA: `actions/checkout`, `actions/setup-node`.
+- `mobile-quality`: Node 22, `npm ci`, gate `static` (typecheck/lint/Jest) e Expo Doctor.
+- `mobile-bundle`: Node 22, `npm ci`, `npm run export` e verificação dos bundles Web/iOS/Android.
+- Sem EAS/credenciais de loja no CI.
+- Checks obrigatórios planejados para `main`: `mobile-quality`, `mobile-bundle`.
