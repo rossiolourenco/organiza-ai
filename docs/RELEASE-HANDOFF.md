@@ -1,6 +1,6 @@
 # Release Handoff — Mobile 3.3 RC
 
-> Documento de passagem para a publicação. Preencher os SHAs após o push da branch.
+> Documento de passagem para a publicação. Base: `main` `b9515fc`; branch `release/3.3-rc`.
 
 ## 1. Identificação
 
@@ -8,10 +8,10 @@
 |---|---|
 | Versão | `3.3.0-rc.1` (app/loja `3.3.0`) |
 | Branch | `release/3.3-rc` |
-| Commit do RC | `<SHA-DO-RC>` |
-| PR | `<URL-DO-PR>` |
-| Artefato | `dist-release/3.3.0-rc.1/organiza-ai-mobile-3.3.0-rc.1.tar.gz` |
-| SHA-256 do artefato | `<SHA256-ARTEFATO>` |
+| Commit do RC | `8fd49e4b80bda31927df70d7e4eebec0490ff166` |
+| PR | https://github.com/rossiolourenco/organiza-ai/pull/2 |
+| Artefato | `dist-release/3.3.0-rc.1/organiza-ai-mobile-3.3.0-rc.1.tar.gz` (3,1 MB) |
+| SHA-256 do artefato | `ce8f4696b8dfce672a2781bdbad6fc62a31f4acf3762759116a1e1bb0a0b8c41` |
 
 ## 2. O que foi validado
 
