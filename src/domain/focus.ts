@@ -63,7 +63,9 @@ export function finishEarly(timer: Timer, now: number): FocusSession | null {
 }
 export function focusMinutes(sessions: FocusSession[], today = dayKey()) {
   const focus = sessions.filter(s => s.mode === 'focus');
-  const sum = (items: FocusSession[]) => Math.floor(items.reduce((n, s) => n + s.duration, 0) / 60000);
+  // Mesma regra do backend: arredonda cada sessão para o minuto mais próximo (mínimo 1).
+  const minutos = (ms: number) => Math.max(1, Math.round(ms / 60000));
+  const sum = (items: FocusSession[]) => items.reduce((n, s) => n + minutos(s.duration), 0);
   return { total: sum(focus), today: sum(focus.filter(s => dayKey(new Date(s.completedAt)) === today)),
     week: sum(focus.filter(s => { const d = dayKey(new Date(s.completedAt)); return d >= weekStart(today) && d <= today; })) };
 }
