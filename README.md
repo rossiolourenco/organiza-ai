@@ -20,6 +20,7 @@
 - **Execução local:** `docs/LOCAL-EXECUTION.md`
 - **Gate de regressão:** `npm run verify`
 - **Validação 3.2:** `docs/VALIDATION-REPORT.md`
+- **Roadmap 3.3:** `docs/ROADMAP-3.3.md`
 
 A versão atual é **3.2.0** (TypeScript/Expo SDK 54), com login sem IP, dashboard Premium, cinco abas,
 perfil e segurança. As notas acadêmicas abaixo são históricas.
