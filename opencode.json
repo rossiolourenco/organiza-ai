@@ -1,0 +1,16 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "STACK.md",
+    "dev-standards/AI-GUIDELINES.md",
+    "dev-standards/01-code-standards/general-principles.md",
+    "dev-standards/01-code-standards/nodejs-typescript.md",
+    "dev-standards/03-api-design/rest-api-standards.md",
+    "dev-standards/04-security/security-checklist.md",
+    "dev-standards/05-architecture/mobile-architecture.md",
+    "dev-standards/06-testing/testing-strategy.md",
+    "dev-standards/07-documentation/adr-template.md",
+    "dev-standards/08-versioning/commit-convention.md",
+    "dev-standards/08-versioning/git-workflow.md"
+  ]
+}

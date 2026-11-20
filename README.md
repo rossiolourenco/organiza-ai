@@ -1,6 +1,6 @@
 # Organiza Aí
 
-> **Mobile 3.0 — Premium Experience:** consulte [docs/MOBILE-3.0.md](docs/MOBILE-3.0.md) para
+> **Mobile 3.2 — Premium Experience:** consulte [docs/MOBILE-3.0.md](docs/MOBILE-3.0.md) para
 > arquitetura, design system, funcionalidades, fórmulas, execução e limites. A entrega técnica,
 > as migrações e o roteiro estão em
 > [../organiza-ai-web/docs/MOBILE-3.0-ENTREGA.md](../organiza-ai-web/docs/MOBILE-3.0-ENTREGA.md)
@@ -9,6 +9,23 @@
 > O backend compartilhado exige a migração V003 e sessão Bearer.
 >
 > As notas abaixo descrevem as entregas acadêmicas anteriores.
+
+## Desenvolvimento e padrões (3.2)
+
+- **Stack e decisões:** `STACK.md`
+- **Instruções para agentes:** `AGENTS.md`
+- **Framework obrigatório:** `dev-standards/AI-GUIDELINES.md`
+- **Integração, conformidade e workflow:** `docs/DEV-STANDARDS-INTEGRATION.md`,
+  `docs/DEV-STANDARDS-COMPLIANCE.md`, `docs/DEVELOPMENT-WORKFLOW.md`
+- **Execução local:** `docs/LOCAL-EXECUTION.md`
+- **Gate de regressão:** `npm run verify`
+- **Validação 3.2:** `docs/VALIDATION-REPORT.md`
+- **Roadmap 3.3:** `docs/ROADMAP-3.3.md`
+
+A versão atual é **3.2.0** (TypeScript/Expo SDK 54), com login sem IP, dashboard Premium, cinco abas,
+perfil e segurança. As notas acadêmicas abaixo são históricas.
+
+---
 
 Aplicativo móvel desenvolvido para a disciplina de Desenvolvimento Mobile.
 
@@ -29,10 +46,10 @@ O objetivo é oferecer uma interface simples e intuitiva para que o usuário pos
 
 ## Tecnologias utilizadas
 
-- React Native
-- JavaScript
-- Expo
-- Expo Go
+- React Native 0.81.5 / Expo SDK 54
+- TypeScript (strict)
+- Expo Router
+- Expo Go (desenvolvimento)
 - Git e GitHub
 
 ## Plataforma
