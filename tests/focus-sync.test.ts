@@ -44,3 +44,13 @@ it('não duplica a sessão local quando o servidor grava segundos depois', () =>
   expect(merged.length).toBe(1);
   expect(merged[0].id).toBe('l1');
 });
+
+it('preserva duas sessões legítimas da mesma tarefa dentro de 5 minutos', () => {
+  const base = Date.parse('2026-11-20T15:00:00Z');
+  const remote = [
+    { id: 11, minutos: 1, data: '2026-11-20', iniciadaEm: new Date(base).toISOString(), tarefaId: 2 },
+    { id: 12, minutos: 1, data: '2026-11-20', iniciadaEm: new Date(base + 5 * 60000).toISOString(), tarefaId: 2 },
+  ];
+  const merged = mergeFocusSessions([], remote);
+  expect(merged.length).toBe(2);
+});

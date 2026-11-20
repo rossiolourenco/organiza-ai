@@ -76,7 +76,8 @@ export interface RemoteFocusSession { id: number; minutos: number; data: string;
  * Une sessões locais e remotas sem duplicar a mesma sessão já sincronizada.
  * A chave de deduplicação usa tarefa + minutos + minuto de conclusão.
  */
-const TOLERANCIA_MS = 5 * 60000;
+// Janela curta: a cópia remota grava segundos depois; sessões legítimas distantes não se fundem.
+const TOLERANCIA_MS = 60 * 1000;
 
 export function mergeFocusSessions(local: FocusSession[], remote: RemoteFocusSession[]): FocusSession[] {
   const minutos = (ms: number) => Math.max(1, Math.round(ms / 60000));
