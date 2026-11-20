@@ -22,6 +22,13 @@
 - **Validação 3.2:** `docs/VALIDATION-REPORT.md`
 - **Roadmap 3.3:** `docs/ROADMAP-3.3.md`
 
+### Paridade 3.3.1
+
+- **Auditoria Mobile:** `docs/MOBILE-PARITY-3.3.1.md`
+- **Matriz completa:** `../organiza-ai-web/docs/FUNCTIONAL-PARITY-3.3.1.md`
+- **Testes cruzados:** `../organiza-ai-web/docs/CROSS-PLATFORM-TESTS.md`
+- **Revalidação ao retomar:** `src/state/RevalidateOnActive.tsx`
+
 ### Release Candidate 3.3
 
 - **Release Mobile:** `docs/RELEASE-3.3-RC.md`

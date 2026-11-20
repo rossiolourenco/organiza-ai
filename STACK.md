@@ -40,6 +40,7 @@ navegador/estado.
 - Versão centralizada em `VERSION`; o gate valida `package.json` e `app.json`.
 - Artefato de homologação em `dist-release/` (fora do Git) via `scripts/build-release.sh`.
 - Dependências com advisories de DoS (deep link/build) exigem upgrade do Expo SDK — P0 do 3.4.
+- 3.3.1: revalidação ao retomar o app (`RevalidateOnActive`, throttle de 10 s) sem alterar telas.
 - Teste em aparelho físico e build assinado continuam pendentes.
 
 ## Referências
