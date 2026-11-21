@@ -21,7 +21,7 @@ export default function AuthScreen({ register = false }: { register?: boolean })
   const [success, setSuccess] = useState(false);
   const auth = useAuth();
   const router = useRouter();
-  const { senha: senhaAlterada } = useLocalSearchParams<{ senha?: string }>();
+  const { senha: senhaAlterada, conta } = useLocalSearchParams<{ senha?: string; conta?: string }>();
   const { colors } = useTheme();
 
   const submit = async () => {
@@ -86,6 +86,12 @@ export default function AuthScreen({ register = false }: { register?: boolean })
               onChangeText={setConfirmation} autoComplete="new-password" /> : null}
 
             <ErrorState message={error || auth.error} />
+            {conta === 'excluida' ? <Row style={{ flexWrap: 'nowrap' }}>
+              <Feather name="check-circle" size={16} color={colors.success} />
+              <Label size="caption" style={{ color: colors.success, flex: 1 }}>
+                Sua conta foi excluída e os dados associados foram removidos.
+              </Label>
+            </Row> : null}
             {senhaAlterada === 'alterada' ? <Row style={{ flexWrap: 'nowrap' }}>
               <Feather name="shield" size={16} color={colors.success} />
               <Label size="caption" style={{ color: colors.success, flex: 1 }}>
