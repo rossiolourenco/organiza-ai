@@ -22,7 +22,8 @@
         "backgroundColor": "#F7F8FC"
       },
       "edgeToEdgeEnabled": true,
-      "versionCode": 34
+      "versionCode": 34,
+      "package": "com.rossiolourenco.organizaai"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,6 +34,12 @@
       "expo-font",
       "expo-asset",
       "expo-notifications"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d9dd3dd6-b387-4e3e-af5f-543ffefbe439"
+      }
+    }
   }
 }
