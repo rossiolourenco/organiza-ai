@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "34"
+      "buildNumber": "34",
+      "bundleIdentifier": "com.rossiolourenco.organizaai"
     },
     "android": {
       "adaptiveIcon": {
@@ -40,6 +41,7 @@
       "eas": {
         "projectId": "d9dd3dd6-b387-4e3e-af5f-543ffefbe439"
       }
-    }
+    },
+    "scheme": "organizaai"
   }
 }
