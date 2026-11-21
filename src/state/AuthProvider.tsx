@@ -11,6 +11,7 @@ interface Auth {
   clear: () => Promise<void>;
   changePassword: (senhaAtual: string, novaSenha: string) => Promise<void>;
   updateProfile: (nome: string) => Promise<void>;
+  deleteAccount: (senha: string) => Promise<void>;
   expire: (token: string) => void;
 }
 const Context = createContext<Auth>(null!);
@@ -70,6 +71,14 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       { method: 'PUT', body: JSON.stringify({ senhaAtual, novaSenha }) }, current.current.token);
   };
 
+  /** Exclui a conta e os dados no servidor; limpa a sessão local em seguida. */
+  const deleteAccount = async (senha: string) => {
+    if (!current.current) throw new Error('Sessão expirada. Entre novamente.');
+    await request(current.current.server, '/usuarios/conta',
+      { method: 'DELETE', body: JSON.stringify({ senha }) }, current.current.token);
+    await clear();
+  };
+
   const updateProfile = async (nome: string) => {
     if (!current.current) throw new Error('Sessão expirada. Entre novamente.');
     const value = await request<Pick<Session, 'id' | 'nome' | 'email'>>(current.current.server,
@@ -80,7 +89,7 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
   };
 
   return <Context.Provider value={{
-    session, ready, error, login, logout, clear, changePassword, updateProfile, expire,
+    session, ready, error, login, logout, clear, changePassword, updateProfile, deleteAccount, expire,
   }}>{children}</Context.Provider>;
 }
 export const useAuth = () => useContext(Context);

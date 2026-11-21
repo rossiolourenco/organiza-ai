@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import {
-  Button, Card, ErrorState, Label, PasswordInput, PremiumCard, Row, Screen,
+  Button, Card, ErrorState, Input, Label, PasswordInput, PremiumCard, Row, Screen, Sheet,
 } from '../../components/ui';
 import { DataFeedback } from '../../components/DataFeedback';
 import { useAuth } from '../../state/AuthProvider';
@@ -19,6 +19,27 @@ export default function SecurityScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [excluirAberto, setExcluirAberto] = useState(false);
+  const [senhaExclusao, setSenhaExclusao] = useState('');
+  const [confirmacaoExclusao, setConfirmacaoExclusao] = useState('');
+  const [excluindo, setExcluindo] = useState(false);
+  const [erroExclusao, setErroExclusao] = useState<string | null>(null);
+
+  const excluirConta = async () => {
+    if (excluindo) return;
+    setErroExclusao(null);
+    if (!senhaExclusao) { setErroExclusao('Informe sua senha.'); return; }
+    if (confirmacaoExclusao.trim().toUpperCase() !== 'EXCLUIR') {
+      setErroExclusao('Digite EXCLUIR para confirmar.'); return;
+    }
+    setExcluindo(true);
+    try {
+      await auth.deleteAccount(senhaExclusao);
+      router.replace({ pathname: '/', params: { conta: 'excluida' } });
+    } catch (e) {
+      setErroExclusao(e instanceof Error ? e.message : 'Não foi possível excluir a conta.');
+    } finally { setExcluindo(false); }
+  };
 
   const submit = async () => {
     if (busy) return;
@@ -95,5 +116,29 @@ export default function SecurityScreen() {
         Você precisará entrar novamente neste e em qualquer outro aparelho.
       </Label>
     </Card>
+
+    <Card style={{ gap: tokens.space.sm, borderColor: colors.danger }}>
+      <Label size="subtitle" weight="bold" style={{ color: colors.danger }}>Excluir minha conta</Label>
+      <Label muted size="caption">
+        Remove permanentemente a conta e os dados associados (tarefas, categorias, hábitos,
+        planejamento e histórico de foco). Esta ação não pode ser desfeita.
+      </Label>
+      <Button title="Excluir minha conta" variant="danger" icon="trash-2"
+        onPress={() => { setSenhaExclusao(''); setConfirmacaoExclusao(''); setErroExclusao(null); setExcluirAberto(true); }} />
+    </Card>
+
+    <Sheet visible={excluirAberto} title="Excluir conta?"
+      subtitle="Todos os seus dados serão removidos. Esta ação não pode ser desfeita."
+      onClose={() => { if (!excluindo) setExcluirAberto(false); }}>
+      <PasswordInput label="Senha atual" value={senhaExclusao} onChangeText={setSenhaExclusao}
+        autoComplete="current-password" />
+      <Input label="Digite EXCLUIR para confirmar" value={confirmacaoExclusao}
+        onChangeText={setConfirmacaoExclusao} autoCapitalize="characters" autoCorrect={false} />
+      <ErrorState message={erroExclusao} />
+      <Button title={excluindo ? 'Excluindo…' : 'Excluir definitivamente'} variant="danger"
+        icon="trash-2" loading={excluindo} onPress={() => { void excluirConta(); }} />
+      <Button title="Cancelar" variant="ghost" disabled={excluindo}
+        onPress={() => setExcluirAberto(false)} />
+    </Sheet>
   </Screen>;
 }
