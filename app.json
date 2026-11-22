@@ -13,14 +13,14 @@
       "backgroundColor": "#F7F8FC"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "buildNumber": "34",
       "bundleIdentifier": "com.rossiolourenco.organizaai"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F7F8FC"
+        "backgroundColor": "#635BFF"
       },
       "edgeToEdgeEnabled": true,
       "versionCode": 34,
