@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import {
@@ -115,6 +115,17 @@ export default function SecurityScreen() {
         Se outra pessoa tiver acesso ao seu token, ele deixa de funcionar assim que a senha é alterada.
         Você precisará entrar novamente neste e em qualquer outro aparelho.
       </Label>
+    </Card>
+
+    <Card style={{ gap: tokens.space.xs }}>
+      <Label size="subtitle">Privacidade e termos</Label>
+      <Label muted size="caption">
+        Consulte como tratamos seus dados e as regras de uso do aplicativo.
+      </Label>
+      <Button title="Política de Privacidade" variant="ghost" icon="shield"
+        onPress={() => { void Linking.openURL('https://organizaai.evox.net.br/privacidade'); }} />
+      <Button title="Termos de Uso" variant="ghost" icon="file-text"
+        onPress={() => { void Linking.openURL('https://organizaai.evox.net.br/termos'); }} />
     </Card>
 
     <Card style={{ gap: tokens.space.sm, borderColor: colors.danger }}>

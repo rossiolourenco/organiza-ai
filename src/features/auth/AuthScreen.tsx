@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
@@ -110,6 +110,16 @@ export default function AuthScreen({ register = false }: { register?: boolean })
             <Button title={register ? 'Já tenho uma conta' : 'Criar uma conta'} variant="ghost" disabled={busy}
               onPress={() => register ? router.replace('/') : router.push('/cadastro')} />
           </Card>
+
+          <Row style={{ justifyContent: 'center', gap: 4, flexWrap: 'wrap' }}>
+            <Pressable onPress={() => { void Linking.openURL('https://organizaai.evox.net.br/termos'); }}>
+              <Label size="micro" style={{ color: colors.primary }}>Termos de Uso</Label>
+            </Pressable>
+            <Label size="micro" muted>·</Label>
+            <Pressable onPress={() => { void Linking.openURL('https://organizaai.evox.net.br/privacidade'); }}>
+              <Label size="micro" style={{ color: colors.primary }}>Política de Privacidade</Label>
+            </Pressable>
+          </Row>
 
           <Row style={{ justifyContent: 'center', gap: 6 }}>
             <Feather name="lock" size={13} color={colors.muted} />
